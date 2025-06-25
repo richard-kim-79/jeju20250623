@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>제주 SNS 모바일 앱 QR 코드</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #3B82F6;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        .qr-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+        #qrcode {
+            display: inline-block;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .instructions {
+            margin-top: 30px;
+            text-align: left;
+            color: #555;
+        }
+        .instructions h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .instructions ol {
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        .test-account {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        .test-account h4 {
+            color: #1976d2;
+            margin: 0 0 10px 0;
+        }
+        .test-account p {
+            margin: 5px 0;
+            font-family: monospace;
+            background: #f5f5f5;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        .download-links {
+            margin-top: 20px;
+        }
+        .download-links a {
+            display: inline-block;
+            margin: 5px;
+            padding: 10px 20px;
+            background: #3B82F6;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        .download-links a:hover {
+            background: #2563EB;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">제주</div>
+        <div class="subtitle">지역 정보 공유 SNS</div>
+        
+        <div class="qr-container">
+            <h3>모바일 앱 QR 코드</h3>
+            <div id="qrcode"></div>
+        </div>
+
+        <div class="test-account">
+            <h4>🧪 테스트 계정</h4>
+            <p><strong>이메일:</strong> test@test.com</p>
+            <p><strong>비밀번호:</strong> 123456</p>
+        </div>
+
+        <div class="instructions">
+            <h3>📱 사용 방법</h3>
+            <ol>
+                <li><strong>Expo Go 앱 설치:</strong> App Store 또는 Google Play에서 "Expo Go" 앱을 다운로드하세요.</li>
+                <li><strong>QR 코드 스캔:</strong> Expo Go 앱을 열고 위의 QR 코드를 스캔하세요.</li>
+                <li><strong>앱 실행:</strong> 스캔 후 자동으로 제주 SNS 앱이 로드됩니다.</li>
+                <li><strong>로그인:</strong> 테스트 계정으로 로그인하여 기능을 테스트해보세요.</li>
+            </ol>
+        </div>
+
+        <div class="download-links">
+            <a href="https://apps.apple.com/app/expo-go/id982107779" target="_blank">📱 iOS Expo Go</a>
+            <a href="https://play.google.com/store/apps/details?id=host.exp.exponent" target="_blank">🤖 Android Expo Go</a>
+        </div>
+    </div>
+
+    <script>
+        // QR 코드 생성
+        const appUrl = 'exp://192.168.0.121:8081'; // 실제 IP 주소
+        
+        QRCode.toCanvas(document.getElementById('qrcode'), appUrl, {
+            width: 200,
+            margin: 2,
+            color: {
+                dark: '#3B82F6',
+                light: '#FFFFFF'
+            }
+        }, function (error) {
+            if (error) console.error(error);
+            console.log('QR 코드가 생성되었습니다!');
+        });
+
+        // 실제 IP 주소 가져오기 (백업용)
+        fetch('https://api.ipify.org?format=json')
+            .then(response => response.json())
+            .then(data => {
+                const localIP = '192.168.0.121'; // 현재 IP 주소
+                const expoUrl = `exp://${localIP}:8081`;
+                
+                QRCode.toCanvas(document.getElementById('qrcode'), expoUrl, {
+                    width: 200,
+                    margin: 2,
+                    color: {
+                        dark: '#3B82F6',
+                        light: '#FFFFFF'
+                    }
+                }, function (error) {
+                    if (error) console.error(error);
+                    console.log('QR 코드가 업데이트되었습니다!');
+                });
+            })
+            .catch(error => {
+                console.log('기본 QR 코드를 사용합니다.');
+            });
+    </script>
+</body>
+</html> 
