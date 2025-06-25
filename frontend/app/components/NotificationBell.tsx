@@ -77,6 +77,9 @@ export default function NotificationBell() {
 
   const fetchNotifications = async () => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
       const response = await fetch('http://localhost:3004/notifications', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -94,6 +97,9 @@ export default function NotificationBell() {
 
   const fetchUnreadCount = async () => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
       const response = await fetch('http://localhost:3004/notifications/unread-count', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -110,6 +116,9 @@ export default function NotificationBell() {
 
   const markAsRead = async (notificationId: number) => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
       const response = await fetch(`http://localhost:3004/notifications/${notificationId}/read`, {
         method: 'PUT',
         headers: {
@@ -127,6 +136,9 @@ export default function NotificationBell() {
 
   const markAllAsRead = async () => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
       const response = await fetch('http://localhost:3004/notifications/mark-all-read', {
         method: 'PUT',
         headers: {
@@ -144,6 +156,9 @@ export default function NotificationBell() {
 
   const deleteNotification = async (notificationId: number) => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
       const response = await fetch(`http://localhost:3004/notifications/${notificationId}`, {
         method: 'DELETE',
         headers: {
