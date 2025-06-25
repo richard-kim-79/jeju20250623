@@ -7,10 +7,13 @@
 - [x] .gitignore 파일 설정
 - [x] 배포 스크립트 생성 (`deploy.sh`)
 
-### 2. 프론트엔드 배포 준비
-- [x] Vercel CLI 설치
-- [x] Vercel 로그인 진행 중
-- [x] vercel.json 설정 파일 생성
+### 2. 프론트엔드 배포 완료 ✅
+- [x] Vercel CLI 설치 및 로그인
+- [x] API URL 환경변수화
+- [x] 빌드 오류 수정 (NotificationBell 컴포넌트)
+- [x] Vercel 배포 성공
+- **배포 URL**: `https://frontend-6957hpiip-bluewhale2025.vercel.app`
+- **상태**: ✅ **Ready** (성공)
 
 ### 3. 백엔드 배포 준비
 - [x] package.json 빌드 스크립트 확인
@@ -19,22 +22,16 @@
 
 ## 🔄 진행 중인 작업
 
-### 1. Vercel 프론트엔드 배포
-- **상태**: 터미널에서 진행 중
+### 1. 백엔드 서버 배포 (AWS EC2)
+- **상태**: 준비 중
 - **다음 단계**: 
-  - Vercel 로그인 완료
-  - 프로젝트 설정 확인
-  - 배포 URL 확인
+  - AWS EC2 인스턴스 생성
+  - 서버 초기 설정
+  - 프로젝트 배포
 
 ## 📋 다음 단계 (우선순위)
 
-### 1순위: 프론트엔드 배포 완료
-```bash
-# Vercel 배포 완료 후
-# 배포 URL을 확인하고 백엔드 API URL 업데이트
-```
-
-### 2순위: 백엔드 서버 배포 (AWS EC2)
+### 1순위: 백엔드 서버 배포 (AWS EC2)
 ```bash
 # 1. AWS EC2 인스턴스 생성
 # 2. 서버 초기 설정
@@ -43,14 +40,14 @@
 # 5. 데이터베이스 연결
 ```
 
-### 3순위: 도메인 및 SSL 설정
+### 2순위: 도메인 및 SSL 설정
 ```bash
 # 1. 도메인 연결
 # 2. SSL 인증서 설정
 # 3. HTTPS 리다이렉트
 ```
 
-### 4순위: 모니터링 및 로깅
+### 3순위: 모니터링 및 로깅
 ```bash
 # 1. PM2 모니터링 설정
 # 2. 로그 관리
@@ -84,15 +81,15 @@ npm start:prod
 - **환경 설정**: `ENVIRONMENT_SETUP.md`
 - **배포 실행**: `deployment-execution-guide.md`
 
-## 🌐 예상 배포 URL
+## 🌐 배포 URL
 
-### 프론트엔드 (Vercel)
-- **개발**: `https://jeju-frontend.vercel.app`
-- **프로덕션**: `https://jeju-frontend.vercel.app`
+### 프론트엔드 (Vercel) ✅
+- **프로덕션**: `https://frontend-6957hpiip-bluewhale2025.vercel.app`
+- **상태**: ✅ **배포 완료**
 
-### 백엔드 (AWS EC2)
-- **개발**: `http://your-ec2-ip:3004`
-- **프로덕션**: `https://api.your-domain.com`
+### 백엔드 (AWS EC2) 🔄
+- **개발**: `http://your-ec2-ip:3004` (준비 중)
+- **프로덕션**: `https://api.your-domain.com` (준비 중)
 
 ## ⚠️ 주의사항
 
@@ -124,4 +121,4 @@ pm2 restart jeju-backend
 ---
 
 **마지막 업데이트**: 2024년 6월 26일
-**배포 상태**: 진행 중 
+**배포 상태**: 프론트엔드 완료, 백엔드 준비 중 
