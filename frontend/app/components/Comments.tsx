@@ -40,11 +40,12 @@ export default function Comments({ postId }: CommentsProps) {
   const fetchComments = async (pageNum: number = 1) => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:3004/comments/${postId}?page=${pageNum}&limit=10`);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3004';
+      const response = await fetch(`${apiUrl}/comments/${postId}?page=${pageNum}&limit=10`);
       if (response.ok) {
         const data = await response.json();
         setComments(data.comments || []);
-        setTotalPages(Math.ceil((data.total || 0) / 10));
+        setTotalPages(data.totalPages || 1);
       }
     } catch (error) {
       console.error('댓글 로딩 오류:', error);
@@ -63,23 +64,28 @@ export default function Comments({ postId }: CommentsProps) {
     if (!newComment.trim()) return;
 
     try {
-      const response = await fetch('http://localhost:3004/comments', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3004';
+      const response = await fetch(`${apiUrl}/comments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          content: newComment,
-          postId: postId,
+          postId,
+          content: newComment.trim(),
         }),
       });
 
       if (response.ok) {
         setNewComment('');
         fetchComments();
+      } else {
+        alert('댓글 작성에 실패했습니다.');
       }
     } catch (error) {
       console.error('댓글 작성 오류:', error);
+      alert('댓글 작성에 실패했습니다.');
     }
   };
 
@@ -89,15 +95,16 @@ export default function Comments({ postId }: CommentsProps) {
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3004/comments', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3004';
+      const response = await fetch(`${apiUrl}/comments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          content: replyContent,
           postId,
+          content: replyContent.trim(),
           parentId,
         }),
       });
@@ -113,9 +120,12 @@ export default function Comments({ postId }: CommentsProps) {
         );
         setReplyContent('');
         setReplyTo(null);
+      } else {
+        alert('답글 작성에 실패했습니다.');
       }
     } catch (error) {
-      console.error('대댓글 작성 실패:', error);
+      console.error('답글 작성 오류:', error);
+      alert('답글 작성에 실패했습니다.');
     } finally {
       setLoading(false);
     }
@@ -127,7 +137,8 @@ export default function Comments({ postId }: CommentsProps) {
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3004/comments', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3004';
+      const response = await fetch(`${apiUrl}/comments`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -135,7 +146,7 @@ export default function Comments({ postId }: CommentsProps) {
         },
         body: JSON.stringify({
           id: commentId,
-          content: editContent,
+          content: editContent.trim(),
         }),
       });
 
@@ -150,9 +161,12 @@ export default function Comments({ postId }: CommentsProps) {
         );
         setEditingComment(null);
         setEditContent('');
+      } else {
+        alert('댓글 수정에 실패했습니다.');
       }
     } catch (error) {
       console.error('댓글 수정 오류:', error);
+      alert('댓글 수정에 실패했습니다.');
     } finally {
       setLoading(false);
     }
@@ -164,15 +178,22 @@ export default function Comments({ postId }: CommentsProps) {
 
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:3004/comments/${commentId}`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3004';
+      const response = await fetch(`${apiUrl}/comments/${commentId}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
       });
 
       if (response.ok) {
         setComments(prev => prev.filter(comment => comment.id !== commentId));
+      } else {
+        alert('댓글 삭제에 실패했습니다.');
       }
     } catch (error) {
       console.error('댓글 삭제 오류:', error);
+      alert('댓글 삭제에 실패했습니다.');
     } finally {
       setLoading(false);
     }
@@ -183,15 +204,22 @@ export default function Comments({ postId }: CommentsProps) {
     if (!token) return;
 
     try {
-      const response = await fetch(`http://localhost:3004/comments/${commentId}/like`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3004';
+      const response = await fetch(`${apiUrl}/comments/${commentId}/like`, {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
       });
 
       if (response.ok) {
         fetchComments();
+      } else {
+        alert('좋아요 처리에 실패했습니다.');
       }
     } catch (error) {
-      console.error('댓글 좋아요 오류:', error);
+      console.error('좋아요 오류:', error);
+      alert('좋아요 처리에 실패했습니다.');
     }
   };
 

@@ -19,7 +19,8 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:3004/test-login', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3004';
+      const response = await fetch(`${apiUrl}/test-login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -30,15 +31,14 @@ export default function LoginPage() {
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem('token', data.token);
-        setSuccess('로그인이 완료되었습니다!');
-        setTimeout(() => {
-          router.push('/');
-        }, 1000);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        router.push('/');
       } else {
         const errorData = await response.json();
         setError(errorData.message || '로그인에 실패했습니다.');
       }
-    } catch (err) {
+    } catch (error) {
+      console.error('로그인 오류:', error);
       setError('서버 연결에 실패했습니다.');
     } finally {
       setLoading(false);

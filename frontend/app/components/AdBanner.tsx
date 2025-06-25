@@ -30,7 +30,8 @@ export default function AdBanner({ position = 'top', className = '' }: AdBannerP
   // 광고 목록 조회
   const fetchAds = async () => {
     try {
-      const response = await fetch(`http://localhost:3004/ads?position=${position}`);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3004';
+      const response = await fetch(`${apiUrl}/ads?position=${position}`);
       if (response.ok) {
         const data = await response.json();
         setAds(data);
@@ -94,7 +95,8 @@ export default function AdBanner({ position = 'top', className = '' }: AdBannerP
   // 광고 노출 기록
   const recordImpression = async (adId: number) => {
     try {
-      await fetch(`http://localhost:3004/ads/${adId}/impression`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3004';
+      await fetch(`${apiUrl}/ads/${adId}/impression`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -111,7 +113,8 @@ export default function AdBanner({ position = 'top', className = '' }: AdBannerP
       const userStr = localStorage.getItem('user');
       const user = userStr ? JSON.parse(userStr) : null;
       
-      await fetch(`http://localhost:3004/ads/${adId}/click`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3004';
+      await fetch(`${apiUrl}/ads/${adId}/click`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -158,7 +161,8 @@ export default function AdBanner({ position = 'top', className = '' }: AdBannerP
         const user = userStr ? JSON.parse(userStr) : null;
         
         // 광고 클릭 기록
-        await fetch(`http://localhost:3004/ads/${currentAd.id}/click`, {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3004';
+        await fetch(`${apiUrl}/ads/${currentAd.id}/click`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -45,7 +45,8 @@ export default function SignupPage() {
     }
 
     try {
-      const response = await fetch('http://localhost:3004/test-signup', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3004';
+      const response = await fetch(`${apiUrl}/test-signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

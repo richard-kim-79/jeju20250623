@@ -80,7 +80,8 @@ export default function NotificationBell() {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const response = await fetch('http://localhost:3004/notifications', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3004';
+      const response = await fetch(`${apiUrl}/notifications`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -100,7 +101,8 @@ export default function NotificationBell() {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const response = await fetch('http://localhost:3004/notifications/unread-count', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3004';
+      const response = await fetch(`${apiUrl}/notifications/unread-count`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -119,7 +121,8 @@ export default function NotificationBell() {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const response = await fetch(`http://localhost:3004/notifications/${notificationId}/read`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3004';
+      const response = await fetch(`${apiUrl}/notifications/${notificationId}/read`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -139,7 +142,8 @@ export default function NotificationBell() {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const response = await fetch('http://localhost:3004/notifications/mark-all-read', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3004';
+      const response = await fetch(`${apiUrl}/notifications/mark-all-read`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -159,7 +163,8 @@ export default function NotificationBell() {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const response = await fetch(`http://localhost:3004/notifications/${notificationId}`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3004';
+      const response = await fetch(`${apiUrl}/notifications/${notificationId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

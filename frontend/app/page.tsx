@@ -17,6 +17,8 @@ interface Post {
   createdAt: string;
   location?: string;
   photos: Array<{ id: number; url: string }>;
+  isLiked: boolean;
+  likeCount: number;
 }
 
 export default function Home() {
@@ -32,10 +34,12 @@ export default function Home() {
     setIsLoggedIn(!!token);
     const fetchPosts = async () => {
       try {
-        const response = await fetch('http://localhost:3004/posts');
+        setLoading(true);
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3004';
+        const response = await fetch(`${apiUrl}/posts`);
         if (response.ok) {
           const data = await response.json();
-          setPosts(data.posts || data);
+          setPosts(data.posts || []);
         } else {
           const mockPosts: Post[] = [
             {
@@ -45,7 +49,9 @@ export default function Home() {
               user: { id: 1, email: "user1@example.com", username: "제주러버" },
               createdAt: "2024-06-23T10:00:00Z",
               location: "제주 올레 7코스",
-              photos: [{ id: 1, url: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=500&h=300&fit=crop" }]
+              photos: [{ id: 1, url: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=500&h=300&fit=crop" }],
+              isLiked: false,
+              likeCount: 0
             },
             {
               id: 2,
@@ -54,7 +60,9 @@ export default function Home() {
               user: { id: 2, email: "user2@example.com", username: "맛집탐험가" },
               createdAt: "2024-06-22T15:30:00Z",
               location: "성산일출봉",
-              photos: [{ id: 2, url: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=500&h=300&fit=crop" }]
+              photos: [{ id: 2, url: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=500&h=300&fit=crop" }],
+              isLiked: false,
+              likeCount: 0
             },
             {
               id: 3,
@@ -63,12 +71,15 @@ export default function Home() {
               user: { id: 3, email: "user3@example.com", username: "제주날씨맨" },
               createdAt: "2024-06-23T08:00:00Z",
               location: "제주시",
-              photos: []
+              photos: [],
+              isLiked: false,
+              likeCount: 0
             }
           ];
           setPosts(mockPosts);
         }
-      } catch (err) {
+      } catch (error) {
+        console.error('게시글 로딩 오류:', error);
         setError('게시글을 불러오는데 실패했습니다.');
         setPosts([]);
       } finally {
@@ -87,27 +98,37 @@ export default function Home() {
   };
 
   const handleLike = async (postId: number) => {
-    if (!isLoggedIn) {
-      router.push('/login');
-      return;
-    }
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3004/posts/${postId}/like`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
-      if (response.ok) {
-        setLikedPosts(prev => {
-          const newSet = new Set(prev);
-          newSet.add(postId);
-          return newSet;
-        });
-      } else {
-        setError('좋아요 처리에 실패했습니다.');
+      if (!token) {
+        alert('로그인이 필요합니다.');
+        return;
       }
-    } catch (err) {
-      setError('서버 연결에 실패했습니다.');
+
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3004';
+      const response = await fetch(`${apiUrl}/posts/${postId}/like`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        // 좋아요 상태 업데이트
+        setPosts(prevPosts =>
+          prevPosts.map(post =>
+            post.id === postId
+              ? { ...post, isLiked: !post.isLiked, likeCount: post.isLiked ? post.likeCount - 1 : post.likeCount + 1 }
+              : post
+          )
+        );
+      } else {
+        alert('좋아요 처리 중 오류가 발생했습니다.');
+      }
+    } catch (error) {
+      console.error('좋아요 오류:', error);
+      alert('좋아요 처리 중 오류가 발생했습니다.');
     }
   };
 
@@ -174,9 +195,9 @@ export default function Home() {
                   <p className="text-gray-600 text-sm line-clamp-2 cursor-pointer hover:text-gray-800" onClick={() => router.push(`/post/${post.id}`)}>{post.content}</p>
                 </div>
                 <div className="flex items-center space-x-4 mt-3">
-                  <button onClick={() => handleLike(post.id)} className={`flex items-center space-x-1 transition-colors ${likedPosts.has(post.id) ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}>
-                    <Heart className={`w-4 h-4 ${likedPosts.has(post.id) ? 'fill-current' : ''}`} />
-                    <span>{likedPosts.has(post.id) ? '1' : '0'}</span>
+                  <button onClick={() => handleLike(post.id)} className={`flex items-center space-x-1 transition-colors ${post.isLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}>
+                    <Heart className={`w-4 h-4 ${post.isLiked ? 'fill-current' : ''}`} />
+                    <span>{post.likeCount}</span>
                   </button>
                   <button className="flex items-center space-x-1 text-gray-400 hover:text-blue-500">
                     <MessageCircle className="w-4 h-4" />
