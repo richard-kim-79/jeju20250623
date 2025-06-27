@@ -3,7 +3,7 @@ import { useState } from 'react';
 import Comments from './Comments';
 
 interface Post {
-  id: string;
+  id: number;
   user: {
     username: string;
     profileImage: string;
