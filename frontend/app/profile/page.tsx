@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Key, Plus, Trash2, Copy, Eye, EyeOff, BarChart3, TrendingUp, Calendar, Zap } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 interface ApiKey {
   id: number;
@@ -38,6 +39,8 @@ interface ApiKeyPlan {
 }
 
 export default function ProfilePage() {
+  const { user, logout } = useAuth();
+  const router = useRouter();
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [apiPlans, setApiPlans] = useState<ApiKeyPlan[]>([]);
   const [newKeyName, setNewKeyName] = useState('');
@@ -47,7 +50,11 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const router = useRouter();
+
+  if (!user) {
+    router.replace('/login');
+    return null;
+  }
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -179,175 +186,24 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto py-6">
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">내 프로필</h1>
-
-        {/* API 키 관리 섹션 */}
-        <div className="mb-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <Key className="w-5 h-5 mr-2" />
-            API 키 관리
-          </h2>
-
-          {/* 새 API 키 발급 */}
-          <div className="bg-gray-50 rounded-lg p-4 mb-6">
-            <h3 className="text-md font-medium text-gray-900 mb-3">새 API 키 발급</h3>
-            <div className="space-y-4">
-              <div className="flex space-x-4">
-                <input
-                  type="text"
-                  placeholder="API 키 이름 (예: 제주 SNS API)"
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                  value={newKeyName}
-                  onChange={(e) => setNewKeyName(e.target.value)}
-                />
-                <select
-                  value={selectedPlan || ''}
-                  onChange={(e) => setSelectedPlan(e.target.value ? parseInt(e.target.value) : null)}
-                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                >
-                  <option value="">플랜 선택 (선택사항)</option>
-                  {apiPlans.map((plan) => (
-                    <option key={plan.id} value={plan.id}>
-                      {plan.name} - {plan.price === 0 ? '무료' : `₩${plan.price.toLocaleString()}/월`}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  onClick={generateApiKey}
-                  disabled={loading}
-                  className="bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  {loading ? '발급 중...' : '발급'}
-                </button>
-              </div>
-              {selectedPlan && (
-                <div className="text-sm text-gray-600">
-                  선택된 플랜: {apiPlans.find(p => p.id === selectedPlan)?.description}
-                </div>
-              )}
-            </div>
+    <div className="min-h-screen bg-black text-white flex flex-col items-center pt-16">
+      <div className="bg-[#181818] shadow-2xl rounded-2xl p-8 w-full max-w-sm text-center">
+        <div className="mb-6">
+          <div className="w-20 h-20 rounded-full bg-gray-700 mx-auto mb-3 flex items-center justify-center text-3xl">
+            {user.username[0]}
           </div>
-
-          {/* 새로 발급된 API 키 표시 */}
-          {showNewKey && newApiKey && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-              <h3 className="text-md font-medium text-green-900 mb-3">새로 발급된 API 키</h3>
-              <p className="text-sm text-green-700 mb-3">
-                이 키는 한 번만 표시됩니다. 안전한 곳에 저장해주세요.
-              </p>
-              <div className="flex items-center space-x-2">
-                <div className="flex-1 bg-white border border-green-300 rounded px-3 py-2 font-mono text-sm">
-                  {newApiKey}
-                </div>
-                <button
-                  onClick={() => copyToClipboard(newApiKey)}
-                  className="bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700"
-                >
-                  <Copy className="w-4 h-4" />
-                </button>
-              </div>
-              <button
-                onClick={() => setShowNewKey(false)}
-                className="mt-3 text-sm text-green-600 hover:text-green-700"
-              >
-                닫기
-              </button>
-            </div>
-          )}
-
-          {/* API 키 목록 */}
-          <div>
-            <h3 className="text-md font-medium text-gray-900 mb-3">내 API 키 목록</h3>
-            {apiKeys.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">발급된 API 키가 없습니다.</p>
-            ) : (
-              <div className="space-y-4">
-                {apiKeys.map((key) => (
-                  <div key={key.id} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <h4 className="font-medium text-gray-900">{key.name}</h4>
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            key.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                          }`}>
-                            {key.isActive ? '활성' : '비활성'}
-                          </span>
-                          {key.plan && (
-                            <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                              {key.plan.name}
-                            </span>
-                          )}
-                        </div>
-                        
-                        <div className="text-sm text-gray-500 mb-3">
-                          <p>생성일: {formatDate(key.createdAt)}</p>
-                          {key.lastUsedAt && <p>마지막 사용: {formatDate(key.lastUsedAt)}</p>}
-                        </div>
-
-                        {/* 사용량 통계 */}
-                        {key.usage && key.plan && (
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="text-gray-600">일간 사용량</span>
-                              <span className="font-medium">
-                                {key.usage.daily.toLocaleString()} / {key.plan.dailyLimit.toLocaleString()}
-                              </span>
-                            </div>
-                            <div className="w-full bg-gray-200 rounded-full h-2">
-                              <div 
-                                className={`h-2 rounded-full ${getUsageColor(getUsagePercentage(key.usage.daily, key.plan.dailyLimit))}`}
-                                style={{ width: `${getUsagePercentage(key.usage.daily, key.plan.dailyLimit)}%` }}
-                              ></div>
-                            </div>
-                            
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="text-gray-600">월간 사용량</span>
-                              <span className="font-medium">
-                                {key.usage.monthly.toLocaleString()} / {key.plan.monthlyLimit.toLocaleString()}
-                              </span>
-                            </div>
-                            <div className="w-full bg-gray-200 rounded-full h-2">
-                              <div 
-                                className={`h-2 rounded-full ${getUsageColor(getUsagePercentage(key.usage.monthly, key.plan.monthlyLimit))}`}
-                                style={{ width: `${getUsagePercentage(key.usage.monthly, key.plan.monthlyLimit)}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => revokeApiKey(key.id)}
-                          className="text-red-600 hover:text-red-800 p-2"
-                          title="API 키 폐기"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <div className="text-xl font-bold mb-1">{user.username}</div>
+          <div className="text-gray-400 text-sm mb-2">{user.email}</div>
+          <button onClick={logout} className="w-full bg-[#1d9bf0] hover:bg-[#007AFF] text-white font-semibold py-2 rounded transition-colors mt-2">로그아웃</button>
         </div>
-
-        {/* 에러 및 성공 메시지 */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
-          </div>
-        )}
-        {success && (
-          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded mb-4">
-            {success}
-          </div>
-        )}
+        <hr className="my-6 border-gray-700" />
+        <div className="text-left">
+          <div className="font-semibold mb-2">내 글</div>
+          <div className="bg-gray-800 rounded p-3 text-gray-300 text-sm mb-2">(목업) 제주 올레길 추천 코스</div>
+          <div className="bg-gray-800 rounded p-3 text-gray-300 text-sm mb-2">(목업) 제주 맛집 리스트</div>
+          <div className="font-semibold mt-6 mb-2">내 활동</div>
+          <div className="bg-gray-800 rounded p-3 text-gray-300 text-sm mb-2">(목업) 댓글 3개, 좋아요 5개</div>
+        </div>
       </div>
     </div>
   );

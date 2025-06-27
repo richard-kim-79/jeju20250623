@@ -113,33 +113,4 @@ export class AuthController {
       profile
     };
   }
-
-  @UseGuards(JwtAuthGuard)
-  @Post('change-password')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: '비밀번호 변경' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        currentPassword: { type: 'string', example: '현재비밀번호123!' },
-        newPassword: { type: 'string', example: '새비밀번호456!' }
-      },
-      required: ['currentPassword', 'newPassword']
-    }
-  })
-  @ApiResponse({ status: 200, description: '비밀번호 변경 성공' })
-  @ApiResponse({ status: 400, description: '비밀번호 정책 위반' })
-  @ApiResponse({ status: 401, description: '인증 필요 또는 현재 비밀번호 오류' })
-  async changePassword(
-    @Request() req,
-    @Body() body: { currentPassword: string; newPassword: string }
-  ) {
-    const result = await this.authService.changePassword(
-      req.user.id,
-      body.currentPassword,
-      body.newPassword
-    );
-    return result;
-  }
 }

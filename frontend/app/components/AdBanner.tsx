@@ -184,10 +184,10 @@ export default function AdBanner({ position = 'top', className = '' }: AdBannerP
 
   if (loading) {
     return (
-      <div className={`bg-gray-200 rounded-lg p-4 ${className}`}>
+      <div className={`bg-gray-800 rounded-lg p-4 ${className}`}>
         <div className="animate-pulse">
-          <div className="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
-          <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+          <div className="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
+          <div className="h-3 bg-gray-700 rounded w-1/2"></div>
         </div>
       </div>
     );
@@ -198,16 +198,7 @@ export default function AdBanner({ position = 'top', className = '' }: AdBannerP
   }
 
   const getBannerStyles = () => {
-    switch (position) {
-      case 'top':
-        return 'w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white';
-      case 'bottom':
-        return 'w-full bg-gradient-to-r from-green-500 to-blue-600 text-white';
-      case 'sidebar':
-        return 'w-64 bg-gradient-to-r from-orange-500 to-red-600 text-white';
-      default:
-        return 'w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white';
-    }
+    return 'w-full bg-black bg-opacity-80 border border-gray-700 text-white';
   };
 
   return (
@@ -229,7 +220,7 @@ export default function AdBanner({ position = 'top', className = '' }: AdBannerP
           )}
           <button
             onClick={handleClick}
-            className="bg-white text-blue-600 px-4 py-2 rounded-md font-medium hover:bg-gray-100 transition-colors"
+            className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors"
           >
             자세히 보기
           </button>

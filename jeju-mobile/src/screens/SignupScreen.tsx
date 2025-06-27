@@ -25,24 +25,6 @@ export default function SignupScreen() {
   const navigation = useNavigation();
   const { signup } = useAuth();
 
-  // 비밀번호 정책 검증
-  const validatePassword = (password: string) => {
-    const checks = {
-      length: password.length >= 8,
-      lowercase: /[a-z]/.test(password),
-      uppercase: /[A-Z]/.test(password),
-      number: /\d/.test(password),
-      special: /[!@#$%^&*(),.?":{}|<>]/.test(password),
-    };
-    
-    return {
-      isValid: Object.values(checks).every(Boolean),
-      checks
-    };
-  };
-
-  const passwordValidation = validatePassword(password);
-
   const handleSignup = async () => {
     if (!email.trim() || !password.trim() || !username.trim()) {
       Alert.alert('오류', '모든 필드를 입력해주세요.');
@@ -54,9 +36,8 @@ export default function SignupScreen() {
       return;
     }
 
-    // 비밀번호 정책 검증
-    if (!passwordValidation.isValid) {
-      Alert.alert('오류', '비밀번호가 정책을 만족하지 않습니다.\n\n- 최소 8자 이상\n- 소문자 포함\n- 대문자 포함\n- 숫자 포함\n- 특수문자 포함');
+    if (password.length < 6) {
+      Alert.alert('오류', '비밀번호는 6자 이상이어야 합니다.');
       return;
     }
 
@@ -157,34 +138,10 @@ export default function SignupScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* 비밀번호 정책 힌트 */}
-          {password && (
-            <View style={styles.passwordHintContainer}>
-              <Text style={styles.passwordHintTitle}>비밀번호 정책:</Text>
-              <View style={styles.passwordHintList}>
-                <Text style={[styles.passwordHintItem, passwordValidation.checks.length && styles.passwordHintValid]}>
-                  {passwordValidation.checks.length ? '✓' : '✗'} 최소 8자 이상
-                </Text>
-                <Text style={[styles.passwordHintItem, passwordValidation.checks.lowercase && styles.passwordHintValid]}>
-                  {passwordValidation.checks.lowercase ? '✓' : '✗'} 소문자 포함
-                </Text>
-                <Text style={[styles.passwordHintItem, passwordValidation.checks.uppercase && styles.passwordHintValid]}>
-                  {passwordValidation.checks.uppercase ? '✓' : '✗'} 대문자 포함
-                </Text>
-                <Text style={[styles.passwordHintItem, passwordValidation.checks.number && styles.passwordHintValid]}>
-                  {passwordValidation.checks.number ? '✓' : '✗'} 숫자 포함
-                </Text>
-                <Text style={[styles.passwordHintItem, passwordValidation.checks.special && styles.passwordHintValid]}>
-                  {passwordValidation.checks.special ? '✓' : '✗'} 특수문자 포함
-                </Text>
-              </View>
-            </View>
-          )}
-
           <TouchableOpacity
-            style={[styles.signupButton, (loading || !passwordValidation.isValid) && styles.signupButtonDisabled]}
+            style={[styles.signupButton, loading && styles.signupButtonDisabled]}
             onPress={handleSignup}
-            disabled={loading || !passwordValidation.isValid}
+            disabled={loading}
           >
             <Text style={styles.signupButtonText}>
               {loading ? '가입 중...' : '회원가입'}
@@ -242,7 +199,7 @@ const styles = StyleSheet.create({
   },
   formTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: '600',
     color: '#333',
     marginBottom: 24,
     textAlign: 'center',
@@ -251,60 +208,39 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
+    borderColor: '#e0e0e0',
+    borderRadius: 12,
     marginBottom: 16,
-    backgroundColor: '#f9f9f9',
+    paddingHorizontal: 16,
+    backgroundColor: '#fafafa',
   },
   inputIcon: {
-    marginLeft: 12,
-    marginRight: 8,
+    marginRight: 12,
   },
   input: {
     flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
+    height: 50,
     fontSize: 16,
     color: '#333',
   },
   passwordInput: {
-    paddingRight: 40,
+    paddingRight: 50,
   },
   passwordToggle: {
+    position: 'absolute',
+    right: 16,
     padding: 8,
-    marginRight: 8,
-  },
-  passwordHintContainer: {
-    backgroundColor: '#f8f9fa',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-  },
-  passwordHintTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
-  },
-  passwordHintList: {
-    gap: 4,
-  },
-  passwordHintItem: {
-    fontSize: 12,
-    color: '#dc3545',
-  },
-  passwordHintValid: {
-    color: '#28a745',
   },
   signupButton: {
     backgroundColor: '#3B82F6',
-    borderRadius: 8,
-    paddingVertical: 14,
+    borderRadius: 12,
+    height: 50,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 8,
+    marginBottom: 20,
   },
   signupButtonDisabled: {
-    backgroundColor: '#ccc',
+    backgroundColor: '#9ca3af',
   },
   signupButtonText: {
     color: '#fff',
@@ -314,7 +250,7 @@ const styles = StyleSheet.create({
   loginContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 20,
+    alignItems: 'center',
   },
   loginText: {
     color: '#666',
