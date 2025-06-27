@@ -49,53 +49,45 @@ export default function Home() {
     const fetchPosts = async () => {
       try {
         setLoading(true);
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3004';
-        const response = await fetch(`${apiUrl}/posts`);
-        
-        if (response.ok) {
-          const data = await response.json();
-          setPosts(data.posts || []);
-        } else {
-          // API 실패 시 mock 데이터 사용
-          const mockPosts: Post[] = [
-            {
-              id: 1,
-              user: { 
-                username: "제주여행러",
-                profileImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face"
-              },
-              createdAt: "2024-06-23T10:00:00Z",
-              content: "오늘 한라산 등반 완료! 정상에서 바라본 제주 전경이 정말 아름다워요. 등산로가 잘 정비되어 있어서 초보자도 쉽게 올라갈 수 있었습니다. 🏔️✨",
-              image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600&h=400&fit=crop",
-              likeCount: 89,
-              commentCount: 8
+        // 백엔드 서버가 없을 수 있으므로 바로 mock 데이터 사용
+        const mockPosts: Post[] = [
+          {
+            id: 1,
+            user: { 
+              username: "제주여행러",
+              profileImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face"
             },
-            {
-              id: 2,
-              user: { 
-                username: "맛집탐험가",
-                profileImage: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face"
-              },
-              createdAt: "2024-06-22T15:30:00Z",
-              content: "성산일출봉 근처에 있는 해산물 맛집을 발견했습니다. 신선한 전복회와 해산물 파스타가 정말 맛있어요. 특히 전복회는 입에서 살살 녹아요! 🍽️✨",
-              image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=600&h=400&fit=crop",
-              likeCount: 156,
-              commentCount: 23
+            createdAt: "2024-06-23T10:00:00Z",
+            content: "오늘 한라산 등반 완료! 정상에서 바라본 제주 전경이 정말 아름다워요. 등산로가 잘 정비되어 있어서 초보자도 쉽게 올라갈 수 있었습니다. 🏔️✨",
+            image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600&h=400&fit=crop",
+            likeCount: 89,
+            commentCount: 8
+          },
+          {
+            id: 2,
+            user: { 
+              username: "맛집탐험가",
+              profileImage: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face"
             },
-            {
-              id: 3,
-              user: { 
-                username: "제주날씨맨",
-                profileImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face"
-              },
-              createdAt: "2024-06-23T08:00:00Z",
-              content: "오늘 제주 날씨가 정말 좋네요. 바람이 약간 있지만 산책하기 딱 좋은 날씨입니다. 오후에는 구름이 조금 끼겠지만 전반적으로 맑은 하늘을 기대할 수 있어요! ☁️🌤️",
-              likeCount: 12,
-              commentCount: 3
-            }
-          ];
-          setPosts(mockPosts);
-        }
+            createdAt: "2024-06-22T15:30:00Z",
+            content: "성산일출봉 근처에 있는 해산물 맛집을 발견했습니다. 신선한 전복회와 해산물 파스타가 정말 맛있어요. 특히 전복회는 입에서 살살 녹아요! 🍽️✨",
+            image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=600&h=400&fit=crop",
+            likeCount: 156,
+            commentCount: 23
+          },
+          {
+            id: 3,
+            user: { 
+              username: "제주날씨맨",
+              profileImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face"
+            },
+            createdAt: "2024-06-23T08:00:00Z",
+            content: "오늘 제주 날씨가 정말 좋네요. 바람이 약간 있지만 산책하기 딱 좋은 날씨입니다. 오후에는 구름이 조금 끼겠지만 전반적으로 맑은 하늘을 기대할 수 있어요! ☁️🌤️",
+            likeCount: 12,
+            commentCount: 3
+          }
+        ];
+        setPosts(mockPosts);
       } catch (error) {
         console.error('게시글 로딩 오류:', error);
         setError('게시글을 불러오는데 실패했습니다.');
