@@ -1,0 +1,237 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  username      String   @unique @default("user")
+  password      String?
+  firebaseUid   String?  @unique
+  profileImage  String?
+  socialProvider String? // 'google', 'kakao', 'naver'
+  lastLoginAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  posts         Post[]
+  comments      Comment[]
+  likes         Like[]
+  commentLikes  CommentLike[]
+  apiKeys       ApiKey[]
+  notifications Notification[] @relation("UserNotifications") // 받는 알림
+  sentNotifications Notification[] @relation("UserSentNotifications") // 보낸 알림
+  advertisements Advertisement[] @relation("Advertiser") // 광고주
+  adStats       AdStat[] // 광고 통계
+
+  @@map("users")
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  location  String?
+  userId    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  photos   Photo[]
+  comments Comment[]
+  likes    Like[]
+
+  @@map("posts")
+}
+
+model Photo {
+  id     Int    @id @default(autoincrement())
+  url    String
+  postId Int
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@map("photos")
+}
+
+model ApiKey {
+  id        Int      @id @default(autoincrement())
+  name      String
+  keyHash   String   @unique
+  userId    Int
+  planId    Int?     // 현재 구독 중인 플랜
+  isActive  Boolean  @default(true)
+  lastUsedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan      ApiKeyPlan? @relation(fields: [planId], references: [id], onDelete: SetNull)
+  usage      ApiKeyUsage[]
+  subscriptions ApiKeySubscription[]
+
+  @@map("api_keys")
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  type      String   // 'like', 'comment', 'follow', 'system'
+  title     String
+  message   String
+  data      Json?    // 추가 데이터 (게시글 ID, 댓글 ID 등)
+  isRead    Boolean  @default(false)
+  recipientId Int
+  senderId  Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  recipient User @relation("UserNotifications", fields: [recipientId], references: [id], onDelete: Cascade)
+  sender    User? @relation("UserSentNotifications", fields: [senderId], references: [id], onDelete: SetNull)
+
+  @@map("notifications")
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  userId    Int
+  postId    Int
+  parentId  Int?     // 대댓글을 위한 필드
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post     Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies  Comment[] @relation("CommentReplies")
+  likes    CommentLike[]
+
+  @@map("comments")
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  postId    Int
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@map("likes")
+}
+
+model CommentLike {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  commentId Int
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, commentId])
+  @@map("comment_likes")
+}
+
+// 광고 시스템 모델
+model Advertisement {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  imageUrl    String?
+  linkUrl     String
+  position    String   // 'top', 'sidebar', 'bottom', 'inline'
+  isActive    Boolean  @default(true)
+  startDate   DateTime
+  endDate     DateTime
+  maxClicks   Int?     // 최대 클릭 수 (null이면 무제한)
+  maxImpressions Int?  // 최대 노출 수 (null이면 무제한)
+  advertiserId Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  advertiser  User?    @relation("Advertiser", fields: [advertiserId], references: [id], onDelete: SetNull)
+  stats       AdStat[]
+
+  @@map("advertisements")
+}
+
+model AdStat {
+  id             Int      @id @default(autoincrement())
+  advertisementId Int
+  type           String   // 'impression', 'click'
+  userId         Int?     // 클릭한 사용자 (노출은 null)
+  ipAddress      String?
+  userAgent      String?
+  referrer       String?
+  createdAt      DateTime @default(now())
+
+  advertisement  Advertisement @relation(fields: [advertisementId], references: [id], onDelete: Cascade)
+  user          User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("ad_stats")
+}
+
+// API 유료화 모델
+model ApiKeyUsage {
+  id        Int      @id @default(autoincrement())
+  apiKeyId  Int
+  endpoint  String   // API 엔드포인트 (예: '/posts', '/search')
+  method    String   // HTTP 메서드 (GET, POST, PUT, DELETE)
+  statusCode Int     // HTTP 상태 코드
+  responseTime Int?  // 응답 시간 (ms)
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  apiKey    ApiKey   @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+
+  @@map("api_key_usage")
+}
+
+model ApiKeyPlan {
+  id          Int      @id @default(autoincrement())
+  name        String   // 'free', 'basic', 'premium', 'enterprise'
+  description String
+  monthlyLimit Int     // 월간 요청 제한
+  dailyLimit   Int     // 일간 요청 제한
+  rateLimit    Int     // 분당 요청 제한
+  price        Float   // 월 구독료 (0이면 무료)
+  features     Json     // 추가 기능 (JSON)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  apiKeys     ApiKey[]
+  subscriptions ApiKeySubscription[]
+
+  @@map("api_key_plans")
+}
+
+model ApiKeySubscription {
+  id        Int      @id @default(autoincrement())
+  apiKeyId  Int
+  planId    Int
+  startDate DateTime @default(now())
+  endDate   DateTime
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  apiKey    ApiKey   @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+  plan      ApiKeyPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@map("api_key_subscriptions")
+}
